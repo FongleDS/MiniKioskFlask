@@ -1,0 +1,33 @@
+
+body, html {
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    background-image: url('./QRScreen.png');
+    background-size: cover;
+    background-repeat: no-repeat;
+    margin: 0;
+    padding: 0;
+    height: 100vh; 
+    width: 100%; 
+}
+
+div {
+    margin-top: 44px;
+    margin-left: 16px;
+    text-align: center;
+}
+
+.frame {
+    display: inline-block;
+}
+
+.output {
+    display: inline-block;
+}
+
+.canvas {
+    display: inline-block;
+}
