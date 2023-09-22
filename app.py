@@ -1,5 +1,3 @@
-import json
-
 from flask import Flask, render_template, request, g, jsonify, Response
 import sqlite3
 import requests
@@ -22,11 +20,25 @@ def close_connection(exception):
 
 #database불러오기
 @app.route('/dbupload')
-def some_endpoint():
+def dbupload():
+    url = "http://127.0.0.1:5000/sqlupload"
+
+    response = requests.get(url)
+
+    data = response.text
+    sql = str(data)
+
     cur = get_db().cursor()
-    cur.execute("SELECT * FROM Student")
+    cur.execute(sql)
+
     data = cur.fetchall()
     return jsonify(data)
+
+@app.route('/sqlupload')
+def sqlupload():
+    sql_string = "SELECT Orders.orderID, Menu.menuName, Menu.menuPrice FROM Orders, OrderDetail, Student, Menu WHERE Student.stdID = '20210796' and Student.stdID = Orders.stdID and Orders.orderID = OrderDetail.orderID and OrderDetail.menuID = Menu.menuID;"
+
+    return str(sql_string)
 
 @app.route("/")
 def home():
@@ -41,20 +53,23 @@ def qrscreen():
 def bill():
     url = "http://127.0.0.1:5000/dbupload"
 
-    # 해당 URL로 GET 요청 수행
     response = requests.get(url)
-
-    # JSON 데이터로 변환
     data = response.json()
 
-    name = data[0][1]
-    id = data[0][0]
+    quantity = len(data)
+    orderID = data[0][0]
+    menu = data[0][1]
+    price = data[0][2]
+
+    total = price
+
+    #total = sum(price)
 
     #cur = get_db().cursor()
     #cur.execute("INSERT INTO your_table_name (name, age) VALUES (?, ?)", (name, age))
     #get_db().commit()
 
-    return render_template('billScreen.html', name = name, id = id)
+    return render_template('billScreen.html', orderID=orderID, menu=menu, price=price, quantitiy = quantity, total = total)
 
 @app.route("/paymentScreen")
 def payment():

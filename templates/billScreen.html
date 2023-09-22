@@ -8,8 +8,22 @@
     </head>
     <body>
         <button type="button" class="payment" onclick="location.href='./paymentScreen'">SELECT</button>
-        <div class="print">
-            {{name}} {{ id }}를 전달받았습니다.
+        <div class="orderID">
+            <b><center>{{ orderID }}</center></b>
+        </div>
+        <div class="box1">
+            <div class="menu1" style="float: left; width: 130px;">
+                {{ menu }}
+            </div>
+            <div class="quantity1" style="float: left; width: 100px;">
+                <center>{{ quantitiy }}</center>
+            </div>
+            <div class="price1" style="float: left; width: 100px; text-align: right;">
+                {{ price }}
+            </div>
+        </div>
+        <div class="totalprice">
+            <b>{{ total }}</b>
         </div>
     </body>
 </html>
