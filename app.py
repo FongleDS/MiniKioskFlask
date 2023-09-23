@@ -6,8 +6,6 @@ app = Flask(__name__)
 DATABASE = './static/DSCafeteria.db'
 app.config['JSON_AS_ASCII'] = False
 
-
-# db 가져오기
 def get_db():
     db = getattr(g, '_database', None)
     if db is None:
@@ -15,15 +13,12 @@ def get_db():
         db.text_factory = str
     return db
 
-
-# db 연결 끊기
 def close_connection(exception):
     db = getattr(g, '_database', None)
     if db is not None:
         db.close()
 
-
-# sql문 받아와서 database 반환
+#database불러오기
 @app.route('/dbupload')
 def dbupload():
     url = "http://127.0.0.1:5000/sqlupload"
@@ -39,54 +34,21 @@ def dbupload():
     data = cur.fetchall()
     return jsonify(data)
 
-
-# 식당별 대기 인원 카운트
-@app.route('/restCount')
-def restCount():
-    sql_string = "SELECT R.RestID, COUNT(O.menuID) AS order_count FROM Restaurant R LEFT JOIN Menu M ON R.RestID = M.RestID LEFT JOIN OrderDetail O ON O.menuID = M.menuID AND O.orderstats = 'NO'GROUP BY R.RestID;"
-    cur = get_db().cursor()
-    cur.execute(sql_string)
-
-    data = cur.fetchall()
-    return jsonify(data)
-
-
-# 로그인 할 때 학번 받아와서 패스워드 반환
-@app.route('/get_password', methods=['POST'])
-def get_password():
-    std_id = request.form['stdID']
-    # 데이터베이스 쿼리를 통해 해당 std_id의 비밀번호 검색
-    print(std_id)
-    # 예시:
-    cur = get_db().cursor()
-    cur.execute("SELECT stdPW FROM Student WHERE stdID=?", (std_id,))
-    password = cur.fetchone()
-    print(password)
-
-    if password:
-        return jsonify({"password": password[0]})
-    else:
-        return jsonify({"error": "Student ID not found"}), 404
-
-
-# sql문 업로드
 @app.route('/sqlupload')
 def sqlupload():
     sql_string = "SELECT Orders.orderID, Menu.menuName, Menu.menuPrice FROM Orders, OrderDetail, Student, Menu WHERE Student.stdID = '20210796' and Student.stdID = Orders.stdID and Orders.orderID = OrderDetail.orderID and OrderDetail.menuID = Menu.menuID;"
 
     return str(sql_string)
 
-# 시작 페이지 연결
 @app.route("/")
 def home():
     return render_template('startScreen.html')
 
-# QR코드 리더기 페이지 연결
 @app.route("/QRScreen")
 def qrscreen():
     return render_template('QRScreen.html')
 
-# bill 페이지 연결과 동시에 주문 내역 반환
+# html로 변수 전달
 @app.route('/billScreen', methods=['GET','POST'])
 def bill():
     url = "http://127.0.0.1:5000/dbupload"
@@ -109,21 +71,9 @@ def bill():
 
     return render_template('billScreen.html', orderID=orderID, menu=menu, price=price, quantitiy = quantity, total = total)
 
-
-# 결제 수단 페이지 연결
 @app.route("/paymentScreen")
 def payment():
     return render_template('paymentScreen.html')
-
-# 카드 결제 페이지 연결
-@app.route("/cardScreen")
-def card():
-    return render_template('cardScreen.html')
-
-# 결제 완료 페이지 연결
-@app.route("/completeScreen")
-def complete():
-    return render_template('completeScreen.html')
 
 
 if __name__ == '__main__':
