@@ -68,13 +68,28 @@ def get_password():
 
 @app.route('/sqlupload')
 def sqlupload():
-    url = "http://127.0.0.1:5000/dbupload"
-
-    response = requests.get(url)
-    data = response.json()
     sql_string = "SELECT Orders.orderID, Menu.menuName, Menu.menuPrice FROM Orders, OrderDetail, Student, Menu WHERE Student.stdID = '20210796' and Student.stdID = Orders.stdID and Orders.orderID = OrderDetail.orderID and OrderDetail.menuID = Menu.menuID;"
 
     return str(sql_string)
+
+
+#database불러오기
+@app.route('/dbupload')
+def dbupload():
+    url = "http://127.0.0.1:5000/sqlupload"
+
+    response = requests.get(url)
+
+    data = response.text
+    sql = str(data)
+
+    cur = get_db().cursor()
+    cur.execute(sql)
+
+    data = cur.fetchall()
+    return jsonify(data)
+
+
 
 @app.route("/")
 def home():
