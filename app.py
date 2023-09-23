@@ -128,6 +128,14 @@ def bill():
 def payment():
     return render_template('paymentScreen.html')
 
+@app.route("/cardScreen")
+def card():
+    return render_template('cardScreen.html')
+
+@app.route("/completeScreen")
+def complete():
+    return render_template('completeScreen.html')
+
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000)
