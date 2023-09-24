@@ -1,15 +1,77 @@
 <!DOCTYPE html>
 <html>
-    <head>
-        <title>KIOSK</title>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <link href = "../static/paymentScreen.css" rel="stylesheet" type="text/css">
-    </head>
-    <body>
-        <!--카드 결제 버튼-->
-        <button type="card_btn" class="payment" onclick="location.href='./cardScreen'">SELECT</button>
-        <!--카카오페이 결제 버튼-->
-        <button type="kakao_btn" class="payment" onclick="location.href='./cardScreen'">SELECT</button>
-    </body>
+<head>
+    <title>KIOSK</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="../static/paymentScreen.css" rel="stylesheet" type="text/css">
+</head>
+<body>
+    <!-- 카드 결제 버튼 -->
+    <button type="button" class="payment" id="cardBtn">카드 결제</button>
+    <!-- 카카오페이 결제 버튼 -->
+    <button type="button" class="payment" id="kakaoBtn">카카오페이 결제</button>
+    <!-- 팝업 모달 -->
+    <div id="myModal" class="modal">
+        <div class="modal-content">
+            <!-- 모달 내용 -->
+            <span class="close" onclick="closeModal()">&times;</span>
+            <!-- 이미지를 모달에 추가하고 스타일을 지정 -->
+            <img src="" id="popupImage">
+        </div>
+    </div>
+
+    <!-- "다음으로" 버튼 -->
+    <button type="button" class="payment" id="nextBtn" style="display: none;" onclick="location.href='./completeScreen'">다음으로</button>
+
+    <script>
+        var paymentButtonClicked = false; // 결제 버튼이 클릭되었는지 여부를 저장하는 변수
+
+        // 모달 열기
+        function openModal() {
+            var modal = document.getElementById("myModal");
+            modal.style.display = "block";
+            modal.classList.add("opened"); // opened 클래스 추가
+        }
+
+        // 모달 닫기
+        function closeModal() {
+            var modal = document.getElementById("myModal");
+            modal.style.display = "none";
+            modal.classList.remove("opened"); // opened 클래스 제거
+        }
+
+        // 카드 결제 버튼 클릭 시 모달 열고 이미지 표시
+        document.getElementById("cardBtn").addEventListener("click", function() {
+            // 이미지 경로 설정
+            var imagePath = "./static/cardPopup.png";
+
+            // 모달에 이미지 표시
+            var popupImage = document.getElementById("popupImage");
+            popupImage.src = imagePath;
+
+            openModal();
+            if (!paymentButtonClicked) { // 결제 버튼이 처음 클릭되면
+                paymentButtonClicked = true; // 결제 버튼이 클릭되었음을 표시
+                document.getElementById("nextBtn").style.display = "block"; // "다음으로" 버튼 표시
+            }
+        });
+
+        // 카카오페이 결제 버튼 클릭 시 모달 열고 이미지 표시
+        document.getElementById("kakaoBtn").addEventListener("click", function() {
+            // 이미지 경로 설정
+            var imagePath = "카카오페이_이미지_경로.jpg";
+
+            // 모달에 이미지 표시
+            var popupImage = document.getElementById("popupImage");
+            popupImage.src = imagePath;
+
+            openModal();
+            if (!paymentButtonClicked) { // 결제 버튼이 처음 클릭되면
+                paymentButtonClicked = true; // 결제 버튼이 클릭되었음을 표시
+                document.getElementById("nextBtn").style.display = "block"; // "다음으로" 버튼 표시
+            }
+        });
+    </script>
+</body>
 </html>
