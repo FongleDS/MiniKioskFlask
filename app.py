@@ -24,19 +24,15 @@ def close_connection(exception):
 
 
 # sql문 받아와서 database 반환
-@app.route('/dbupload')
+@app.route('/kioskbilldb')
 def dbupload():
-    url = "http://127.0.0.1:5000/sqlupload"
-
-    response = requests.get(url)
-
-    data = response.text
-    sql = str(data)
+    sql = ("SELECT Orders.orderID, Menu.menuName, Menu.menuPrice FROM Orders, OrderDetail, Student, Menu WHERE Student.stdID = '20210796' and Student.stdID = Orders.stdID and Orders.orderID = OrderDetail.orderID and OrderDetail.menuID = Menu.menuID;")
 
     cur = get_db().cursor()
     cur.execute(sql)
 
     data = cur.fetchall()
+    cur.close()
     return jsonify(data)
 
 
@@ -48,6 +44,7 @@ def restCount():
     cur.execute(sql_string)
 
     data = cur.fetchall()
+    cur.close()
     return jsonify(data)
 
 
@@ -61,6 +58,7 @@ def get_password():
     cur = get_db().cursor()
     cur.execute("SELECT stdPW FROM Student WHERE stdID=?", (std_id,))
     password = cur.fetchone()
+    cur.close()
     print(password)
 
     if password:
@@ -75,22 +73,17 @@ def getOrderInfo():
     print(std_id)
 
     cur = get_db().cursor()
-    cur.execute("SELECT orderID,orderDate,seatID FROM Orders WHERE Orders.stdID=?", (std_id,))
+    cur.execute("SELECT Orders.orderID, Orders.orderDate, Orders.seatID, Student.stdName FROM Orders, Student WHERE Orders.stdID=? and Student.stdID=?;", (std_id, std_id))
     info = cur.fetchone()
+    cur.close()
     print(info)
 
     if info:
-        return jsonify({"orderid": info[0]}, {"orderdate": info[1]}, {"seatid": info[2]})
+        return jsonify({"orderid": info[0]}, {"orderdate": info[1]}, {"seatid": info[2]}, {"stdName" : info[3]})
     else:
         return jsonify({"error": "Student ID not found"}), 404
 
 
-# sql문 업로드
-@app.route('/sqlupload')
-def sqlupload():
-    sql_string = "SELECT Orders.orderID, Menu.menuName, Menu.menuPrice FROM Orders, OrderDetail, Student, Menu WHERE Student.stdID = '20210796' and Student.stdID = Orders.stdID and Orders.orderID = OrderDetail.orderID and OrderDetail.menuID = Menu.menuID;"
-
-    return str(sql_string)
 
 # 시작 페이지 연결
 @app.route("/")
@@ -105,7 +98,7 @@ def qrscreen():
 # bill 페이지 연결과 동시에 주문 내역 반환
 @app.route('/billScreen', methods=['GET','POST'])
 def bill():
-    url = "http://127.0.0.1:5000/dbupload"
+    url = "http://127.0.0.1:5000/kioskbilldb"
 
     response = requests.get(url)
     data = response.json()
