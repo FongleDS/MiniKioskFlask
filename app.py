@@ -83,8 +83,6 @@ def getOrderInfo():
     else:
         return jsonify({"error": "Student ID not found"}), 404
 
-
-
 # 시작 페이지 연결
 @app.route("/")
 def home():
