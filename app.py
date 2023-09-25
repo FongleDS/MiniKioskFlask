@@ -83,6 +83,24 @@ def getOrderInfo():
     else:
         return jsonify({"error": "Student ID not found"}), 404
 
+
+@app.route('/orderUpdate', methods=['POST'])
+def get_password():
+    std_id = request.form['stdID']
+    # 데이터베이스 쿼리를 통해 해당 std_id의 비밀번호 검색
+    print(std_id)
+
+    cur = get_db().cursor()
+    cur.execute("INSERT INTO Orders VALUES ?, ?, ?, ?", (std_id, std_id))
+    info = cur.fetchone()
+    cur.close()
+    print(info)
+
+    if info:
+        return jsonify({"orderID": info[0]})
+    else:
+        return jsonify({"error": "Student ID not found"}), 404
+
 # 시작 페이지 연결
 @app.route("/")
 def home():
