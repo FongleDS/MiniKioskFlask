@@ -87,8 +87,9 @@ def getOrderInfo():
 @app.route('/orderUpdate', methods=['POST'])
 def get_password():
     std_id = request.form['stdID']
-    # 데이터베이스 쿼리를 통해 해당 std_id의 비밀번호 검색
-    print(std_id)
+    menu_id = request.form['menuID']
+    seat_id = request.form['seatID']
+    order_date = request.form['orderDate']
 
     cur = get_db().cursor()
     cur.execute("INSERT INTO Orders VALUES ?, ?, ?, ?", (std_id, std_id))
