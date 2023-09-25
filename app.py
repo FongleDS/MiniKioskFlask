@@ -84,6 +84,8 @@ def getOrderInfo():
         return jsonify({"error": "Student ID not found"}), 404
 
 
+
+'''
 @app.route('/orderUpdate', methods=['POST'])
 def get_password():
     std_id = request.form['stdID']
@@ -92,7 +94,7 @@ def get_password():
     order_date = request.form['orderDate']
 
     cur = get_db().cursor()
-    cur.execute("INSERT INTO Orders VALUES ?, ?, ?, ?", (std_id, std_id))
+    # cur.execute("INSERT INTO Orders VALUES ?, ?, ?, ?", (std_id, std_id))
     info = cur.fetchone()
     cur.close()
     print(info)
@@ -101,6 +103,8 @@ def get_password():
         return jsonify({"orderID": info[0]})
     else:
         return jsonify({"error": "Student ID not found"}), 404
+'''
+
 
 # 시작 페이지 연결
 @app.route("/")
