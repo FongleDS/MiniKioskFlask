@@ -68,42 +68,64 @@ def get_password():
 
 @app.route("/getOrderInfo", methods=['POST'])
 def getOrderInfo():
-    std_id = request.form['stdID']
+    order_id = request.form['orderID']
     # 데이터베이스 쿼리를 통해 해당 std_id의 비밀번호 검색
-    print(std_id)
+    print(order_id)
 
     cur = get_db().cursor()
-    cur.execute("SELECT Orders.orderID, Orders.orderDate, Orders.seatID, Student.stdName FROM Orders, Student WHERE Orders.stdID=? and Student.stdID=?;", (std_id, std_id))
+    cur.execute("SELECT Student.stdName, Orders.orderDate, Orders.seatID, Menu.menuName FROM Orders JOIN Student ON Orders.stdID = Student.stdIDJOIN OrderDetail ON Orders.orderID = OrderDetail.orderIDJOIN Menu ON OrderDetail.menuID = Menu.menuIDWHERE Orders.orderID = ?;", (order_id, ))
     info = cur.fetchone()
     cur.close()
     print(info)
 
     if info:
-        return jsonify({"orderid": info[0]}, {"orderdate": info[1]}, {"seatid": info[2]}, {"stdName" : info[3]})
+        return jsonify({"stdName": info[0]}, {"orderdate": info[1]}, {"seatid": info[2]}, {"menuName" : info[3]})
     else:
         return jsonify({"error": "Student ID not found"}), 404
 
 
 
-'''
+
 @app.route('/orderUpdate', methods=['POST'])
-def get_password():
+def orderUpdate():
     std_id = request.form['stdID']
     menu_id = request.form['menuID']
     seat_id = request.form['seatID']
     order_date = request.form['orderDate']
 
     cur = get_db().cursor()
-    # cur.execute("INSERT INTO Orders VALUES ?, ?, ?, ?", (std_id, std_id))
-    info = cur.fetchone()
-    cur.close()
-    print(info)
 
-    if info:
-        return jsonify({"orderID": info[0]})
+    last_inserted_id = ""
+
+    try:
+        # orderid 테이블에 데이터 삽입
+        cur.execute("INSERT INTO Orders (stdID, orderDate, seatID) VALUES (?, ?, ?)", (std_id, order_date, seat_id))
+
+        # 마지막에 삽입된 데이터의 ID를 가져옴
+        last_inserted_id = cur.lastrowid
+        print(last_inserted_id)
+        # last_inserted_id = str(last_inserted_id)
+
+        # orderdetail 테이블에 삽입
+        cur.execute("INSERT INTO OrderDetail (orderID, menuID) VALUES (?, ?)",
+                    (last_inserted_id, menu_id))
+        get_db().commit()
+
+    except Exception as e:
+        print("Error:", e)
+        get_db().rollback()
+
+    finally:
+        cur.close()
+
+    cur.close()
+    print("last_inserted_id : ", last_inserted_id)
+
+    if last_inserted_id:
+        return jsonify({"orderID": last_inserted_id})
     else:
         return jsonify({"error": "Student ID not found"}), 404
-'''
+
 
 
 # 시작 페이지 연결
@@ -130,12 +152,6 @@ def bill():
     price = data[0][2]
 
     total = price
-
-    #total = sum(price)
-
-    #cur = get_db().cursor()
-    #cur.execute("INSERT INTO your_table_name (name, age) VALUES (?, ?)", (name, age))
-    #get_db().commit()
 
     return render_template('billScreen.html', orderID=orderID, menu=menu, price=price, quantitiy = quantity, total = total)
 
