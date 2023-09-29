@@ -73,13 +73,13 @@ def getOrderInfo():
     print(order_id)
 
     cur = get_db().cursor()
-    cur.execute("SELECT Student.stdName, Orders.orderDate, Orders.seatID, Menu.menuName FROM Orders JOIN Student ON Orders.stdID = Student.stdIDJOIN OrderDetail ON Orders.orderID = OrderDetail.orderIDJOIN Menu ON OrderDetail.menuID = Menu.menuIDWHERE Orders.orderID = ?;", (order_id, ))
+    cur.execute("SELECT Student.stdName, Orders.orderDate, Orders.seatID, Menu.menuName FROM Orders JOIN Student ON Orders.stdID = Student.stdID JOIN OrderDetail ON Orders.orderID = OrderDetail.orderID JOIN Menu ON OrderDetail.menuID = Menu.menuID WHERE Orders.orderID = ?;", (order_id, ))
     info = cur.fetchone()
     cur.close()
     print(info)
 
     if info:
-        return jsonify({"stdName": info[0]}, {"orderdate": info[1]}, {"seatid": info[2]}, {"menuName" : info[3]})
+        return jsonify({"stdName": info[0]}, {"seatid": info[1]}, {"orderdate": info[2]}, {"menuName" : info[3]})
     else:
         return jsonify({"error": "Student ID not found"}), 404
 
