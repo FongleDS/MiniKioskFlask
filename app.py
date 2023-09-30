@@ -79,11 +79,52 @@ def getOrderInfo():
     print(info)
 
     if info:
-        return jsonify({"stdName": info[0]}, {"seatid": info[1]}, {"orderdate": info[2]}, {"menuName" : info[3]})
+        return jsonify({"stdName": info[0]}, {"orderdate": info[1]}, {"seatid": info[2]}, {"menuName" : info[3]})
     else:
         return jsonify({"error": "Student ID not found"}), 404
 
 
+@app.route("/seatON", methods=['POST'])
+def seatON():
+    seatID = request.form['seatID']
+    # 데이터베이스 쿼리를 통해 해당 std_id의 비밀번호 검색
+    print(seatID)
+
+    cur = get_db().cursor()
+    cur.execute("UPDATE Seat SET seatUse = 'YES' WHERE seatID = ?;", (seatID, ))
+    get_db().commit()
+    cur.close()
+
+    return jsonify({"Result": "TRUE"})
+
+
+@app.route("/seatOFF", methods=['POST'])
+def seatOFF():
+    seatID = request.form['seatID']
+    # 데이터베이스 쿼리를 통해 해당 std_id의 비밀번호 검색
+    print(seatID)
+
+    cur = get_db().cursor()
+    cur.execute("UPDATE Seat SET seatUse = 'NO' WHERE seatID = ?;", (seatID, ))
+    get_db().commit()
+    cur.close()
+
+    return jsonify({"Result": "FALSE"})
+
+
+@app.route("/getSeatInfo", methods=['POST'])
+def getSeatInfo():
+    seatID = request.form['seatID']
+    # 데이터베이스 쿼리를 통해 해당 std_id의 비밀번호 검색
+    print(seatID)
+
+    cur = get_db().cursor()
+    cur.execute("SELECT seatUse FROM Seat WHERE seatID=?;", (seatID, ))
+    info = cur.fetchone()
+    cur.close()
+    print(info)
+
+    return jsonify({"Result": info[0]})
 
 
 @app.route('/orderUpdate', methods=['POST'])
