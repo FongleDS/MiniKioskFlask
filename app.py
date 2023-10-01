@@ -26,23 +26,11 @@ def close_connection(exception):
         db.close()
 
 
-# sql문 받아와서 database 반환
-@app.route('/kioskbilldb')
-def dbupload():
-    sql = ("SELECT Orders.orderID, Menu.menuName, Menu.menuPrice FROM Orders, OrderDetail, Student, Menu WHERE Student.stdID = '20210796' and Student.stdID = Orders.stdID and Orders.orderID = OrderDetail.orderID and OrderDetail.menuID = Menu.menuID;")
-
-    cur = get_db().cursor()
-    cur.execute(sql)
-
-    data = cur.fetchall()
-    cur.close()
-    return jsonify(data)
-
 
 # 식당별 대기 인원 카운트
 @app.route('/restCount')
 def restCount():
-    sql_string = "SELECT R.RestID, COUNT(O.menuID) AS order_count FROM Restaurant R LEFT JOIN Menu M ON R.RestID = M.RestID LEFT JOIN OrderDetail O ON O.menuID = M.menuID AND O.orderstats = 'NO'GROUP BY R.RestID;"
+    sql_string = "SELECT R.RestID, COUNT(O.menuID) AS order_count FROM Restaurant R LEFT JOIN Menu M ON R.RestID = M.RestID LEFT JOIN OrderDetail O ON O.menuID = M.menuID AND O.orderstats = 0 GROUP BY R.RestID;"
     cur = get_db().cursor()
     cur.execute(sql_string)
 
@@ -134,6 +122,21 @@ def seatOFF():
     return jsonify({"Result": "FALSE"})
 
 
+@app.route("/updateOrderStat", methods=['POST'])
+def updateOrderStat():
+    stat = request.form['stat']
+    orderID = request.form['orderID']
+    # 데이터베이스 쿼리를 통해 해당 std_id의 비밀번호 검색
+    # print(stat)
+
+    cur = get_db().cursor()
+    cur.execute("UPDATE OrderDetail SET orderstats = ? WHERE orderID = ?;", (stat, orderID))
+    get_db().commit()
+    cur.close()
+
+    return jsonify({"Result": "orderStat changed"})
+
+
 @app.route("/getSeatInfo", methods=['POST'])
 def getSeatInfo():
     seatID = request.form['seatID']
@@ -149,6 +152,21 @@ def getSeatInfo():
     return jsonify({"Result": info[0]})
 
 
+@app.route("/getmenuName", methods=['POST'])
+def getmenuName():
+    menuID = request.form['menuID']
+    # 데이터베이스 쿼리를 통해 해당 std_id의 비밀번호 검색
+    print(menuID)
+
+    cur = get_db().cursor()
+    cur.execute("SELECT menuName FROM menu WHERE menuID=?;", (menuID, ))
+    info = cur.fetchone()
+    cur.close()
+    print(info)
+    print("=========")
+
+    return jsonify({"Menu": info[0]})
+
 @app.route('/orderUpdate', methods=['POST'])
 def orderUpdate():
     std_id = request.form['stdID']
@@ -157,8 +175,6 @@ def orderUpdate():
     order_date = request.form['orderDate']
 
     cur = get_db().cursor()
-
-    last_inserted_id = ""
 
     try:
         # orderid 테이블에 데이터 삽입
@@ -171,6 +187,9 @@ def orderUpdate():
         cur.execute("INSERT INTO OrderDetail (orderID, menuID) VALUES (?, ?)",
                     (last_inserted_id, menu_id))
         get_db().commit()
+
+        cur.execute("SELECT RestID FROM Menu WHERE menuID=?;", (menu_id,))
+        info = cur.fetchone()
 
     except Exception as e:
         print("Error:", e)
@@ -186,10 +205,14 @@ def orderUpdate():
         result = {
             "orderID": last_inserted_id,
             "MenuID": menu_id,
-            "StdID": std_id
+            "StdID": std_id,
+            "RestID": info[0]
         }
+        print("========")
+        #socketio.emit('order_updated', result, broadcast=True)
+        socketio.emit('order_updated', result)
         print(result)
-        # socketio.emit('order_updated', result, broadcast=True) # 이 부분이 추가됩니다.
+
         return jsonify(result)
     else:
         return jsonify({"error": "Student ID not found"}), 404
@@ -207,26 +230,52 @@ def orderUpdate():
 def home():
     return render_template('startScreen.html')
 
+
 # QR코드 리더기 페이지 연결
 @app.route("/QRScreen")
 def qrscreen():
     return render_template('QRScreen.html')
 
+billdata = []
+
+@app.route("/getQRInfo", methods=['POST', 'GET'])
+def QRInfo():
+
+    qrdata = request.json['qrData']
+    info = qrdata.split("_")
+    print(info)
+
+    stdID = str(info[1])
+    orderID = str(info[0])
+    sql = "SELECT Orders.orderID, Menu.menuName, Menu.menuPrice FROM Orders JOIN OrderDetail ON Orders.orderID = OrderDetail.orderID JOIN Menu ON OrderDetail.menuID = Menu.menuID JOIN Student ON Student.stdID = Orders.stdID WHERE Student.stdID = ? AND Orders.orderID = ?;"
+
+    cur = get_db().cursor()
+    cur.execute(sql, (stdID, orderID))
+    data_list = cur.fetchall()
+    cur.close()
+
+    for item in data_list:
+        for data in item:
+            billdata.append(data)
+
+    print(billdata)
+
+    print(data_list)
+    return jsonify(data_list)
+
+
 # bill 페이지 연결과 동시에 주문 내역 반환
 @app.route('/billScreen', methods=['GET','POST'])
 def bill():
-    url = "http://127.0.0.1:5000/kioskbilldb"
 
-    response = requests.get(url)
-    data = response.json()
-
-    quantity = len(data)
-    orderID = data[0][0]
-    menu = data[0][1]
-    price = data[0][2]
-
+    quantity = "1"
+    orderID = billdata[0]
+    menu = billdata[1]
+    price = billdata[2]
     total = price
 
+    #total = price
+    #return render_template('billScreen.html')
     return render_template('billScreen.html', orderID=orderID, menu=menu, price=price, quantitiy = quantity, total = total)
 
 @app.route("/paymentScreen")

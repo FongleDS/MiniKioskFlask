@@ -96,13 +96,22 @@
                                     outputData.parentElement.hidden = false;
 
                                     // 다음 페이지로 이동
-                                    location.href = '/billScreen';
+                                    // location.href = '/billScreen';
           			
                                     // QR코드 메시지 출력
                                     outputData.innerHTML = code.data;
-          			
-                                    // return을 써서 함수를 빠져나가면 QR코드 프로그램이 종료된다.
-                                    // return;
+                                    fetch('/getQRInfo', {
+                                        method: 'POST',
+                                        headers: {
+                                            'Content-Type': 'application/json'
+                                        },
+                                        body: JSON.stringify({ qrData: code.data })  // QR 코드 데이터를 JSON 형태로 전송
+                                    })
+                                    .then(response => response.json())
+                                    .then(data => console.log(data))
+                                    .catch(error => console.error('Error:', error));
+
+                                    location.href = '/billScreen';
                               }
         		
                               // QR코드 인식에 실패한 경우 
