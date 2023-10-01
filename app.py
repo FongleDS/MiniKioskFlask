@@ -1,8 +1,11 @@
 from flask import Flask, render_template, request, g, jsonify, Response
 import sqlite3
 import requests
+from flask_socketio import SocketIO
+
 
 app = Flask(__name__)
+socketio = SocketIO(app)
 DATABASE = './static/DSCafeteria.db'
 app.config['JSON_AS_ASCII'] = False
 
@@ -65,6 +68,25 @@ def get_password():
         return jsonify({"password": password[0]})
     else:
         return jsonify({"error": "Student ID not found"}), 404
+
+
+@app.route('/getRestPassword', methods=['POST'])
+def getRestPW():
+    RestID = request.form['RestID']
+    # 데이터베이스 쿼리를 통해 해당 std_id의 비밀번호 검색
+    print(RestID)
+
+    cur = get_db().cursor()
+    cur.execute("SELECT RestPW FROM Restaurant WHERE RestID=?", (RestID,))
+    password = cur.fetchone()
+    cur.close()
+    print(password)
+
+    if password:
+        return jsonify({"password": password[0]})
+    else:
+        return jsonify({"error": "Student ID not found"}), 404
+
 
 @app.route("/getOrderInfo", methods=['POST'])
 def getOrderInfo():
@@ -144,8 +166,6 @@ def orderUpdate():
 
         # 마지막에 삽입된 데이터의 ID를 가져옴
         last_inserted_id = cur.lastrowid
-        print(last_inserted_id)
-        # last_inserted_id = str(last_inserted_id)
 
         # orderdetail 테이블에 삽입
         cur.execute("INSERT INTO OrderDetail (orderID, menuID) VALUES (?, ?)",
@@ -163,10 +183,23 @@ def orderUpdate():
     print("last_inserted_id : ", last_inserted_id)
 
     if last_inserted_id:
-        return jsonify({"orderID": last_inserted_id})
+        result = {
+            "orderID": last_inserted_id,
+            "MenuID": menu_id,
+            "StdID": std_id
+        }
+        print(result)
+        # socketio.emit('order_updated', result, broadcast=True) # 이 부분이 추가됩니다.
+        return jsonify(result)
     else:
         return jsonify({"error": "Student ID not found"}), 404
 
+'''
+    if last_inserted_id:
+        return jsonify({"orderID": last_inserted_id}, {"MenuID": menu_id}, {"StdID", std_id})
+    else:
+        return jsonify({"error": "Student ID not found"}), 404
+'''
 
 
 # 시작 페이지 연결
@@ -201,7 +234,8 @@ def payment():
     return render_template('paymentScreen.html')
 
 
+
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000)
+    socketio.run(app, host='0.0.0.0', port=5000)
 
 
