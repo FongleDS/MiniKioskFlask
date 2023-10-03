@@ -153,7 +153,13 @@ def seatOFF():
 @app.route("/updateOrderStat", methods=['POST'])
 def updateOrderStat():
     stat = request.form['stat']
+    print(stat)
     orderID = request.form['orderID']
+
+    if stat == "1":
+        print("Send!")
+        socketio.emit('pickup_alarm', "ALARM")
+
     # 데이터베이스 쿼리를 통해 해당 std_id의 비밀번호 검색
     # print(stat)
 
@@ -162,7 +168,7 @@ def updateOrderStat():
     get_db().commit()
     cur.close()
 
-    return jsonify({"Result": "orderStat changed"})
+    return jsonify({"Result": "ALARM"})
 
 
 @app.route("/getSeatInfo", methods=['POST'])
