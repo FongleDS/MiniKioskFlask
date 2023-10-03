@@ -286,6 +286,7 @@ def QRInfo():
     cur = get_db().cursor()
     cur.execute(sql, (stdID, orderID))
     data_list = cur.fetchall()
+    print(data_list)
     cur.close()
 
     for item in data_list:
@@ -316,9 +317,11 @@ def bill():
 def payment():
     return render_template('paymentScreen.html')
 
-
+@app.route('/complete')
+def complete():
+    return render_template('complete.html')
 
 if __name__ == '__main__':
-    socketio.run(app, host='0.0.0.0', port=5000)
+    socketio.run(app, host='0.0.0.0', port=5000, allow_unsafe_werkzeug=True)
 
 

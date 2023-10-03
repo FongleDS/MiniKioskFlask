@@ -3,7 +3,7 @@
     <head>
         <title>KIOSK</title>
         <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="viewport" content="width=10, initial-scale=1.0">
         <link href = "../static/startScreen.css" rel="stylesheet" type="text/css">
     </head>
     <body>
@@ -11,6 +11,10 @@
                 <button type="button" class="payment_btn" onclick="location.href='./QRScreen'">CLICK</button>
         </div>
         <script type="text/javascript" src="../static/startScreen.js"></script>
-
+        <script type="text/javascript">
+            window.onload = function () {
+                window.resizeTo(1000, 1600); // 원하는 너비와 높이로 설정
+            };
+        </script>
     </body>
 </html>
