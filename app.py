@@ -251,13 +251,6 @@ def orderUpdate():
     else:
         return jsonify({"error": "Student ID not found"}), 404
 
-'''
-    if last_inserted_id:
-        return jsonify({"orderID": last_inserted_id}, {"MenuID": menu_id}, {"StdID", std_id})
-    else:
-        return jsonify({"error": "Student ID not found"}), 404
-'''
-
 
 # 시작 페이지 연결
 @app.route("/")
@@ -319,7 +312,7 @@ def payment():
 
 @app.route('/complete')
 def complete():
-    return render_template('complete.html')
+    return render_template('completeScreen.html')
 
 if __name__ == '__main__':
     socketio.run(app, host='0.0.0.0', port=5000, allow_unsafe_werkzeug=True)
