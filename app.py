@@ -122,6 +122,17 @@ def countSeat():
     return jsonify({"leftseat": info[0]})
 
 
+@app.route("/countWaiting")
+def countWaiting():
+    cur = get_db().cursor()
+    cur.execute("SELECT COUNT(*) FROM OrderDetail WHERE orderstats = '0';")
+    info = cur.fetchone()
+    cur.close()
+    print(info)
+
+    return jsonify({"waiting": info[0]})
+
+
 @app.route("/seatON", methods=['POST'])
 def seatON():
     seatID = request.form['seatID']
@@ -150,6 +161,7 @@ def seatOFF():
     return jsonify({"Result": "FALSE"})
 
 
+
 @app.route("/updateOrderStat", methods=['POST'])
 def updateOrderStat():
     stat = request.form['stat']
@@ -159,9 +171,6 @@ def updateOrderStat():
     if stat == "1":
         print("Send!")
         socketio.emit('pickup_alarm', "ALARM")
-
-    # 데이터베이스 쿼리를 통해 해당 std_id의 비밀번호 검색
-    # print(stat)
 
     cur = get_db().cursor()
     cur.execute("UPDATE OrderDetail SET orderstats = ? WHERE orderID = ?;", (stat, orderID))
@@ -302,17 +311,12 @@ def bill():
     price = billdata[2]
     total = price
 
-    #total = price
-    #return render_template('billScreen.html')
     return render_template('billScreen.html', orderID=orderID, menu=menu, price=price, quantitiy = quantity, total = total)
 
 @app.route("/paymentScreen")
 def payment():
     return render_template('paymentScreen.html')
 
-@app.route('/complete')
-def complete():
-    return render_template('completeScreen.html')
 
 @app.route("/completeScreen")
 def complete():
@@ -320,5 +324,3 @@ def complete():
 
 if __name__ == '__main__':
     socketio.run(app, host='0.0.0.0', port=5000, allow_unsafe_werkzeug=True)
-
-
