@@ -3,7 +3,6 @@ import sqlite3
 import requests
 from flask_socketio import SocketIO
 
-
 app = Flask(__name__)
 socketio = SocketIO(app)
 DATABASE = './static/DSCafeteria.db'
@@ -121,6 +120,37 @@ def countSeat():
 
     return jsonify({"leftseat": info[0]})
 
+@app.route("/basketInit")
+def basketInit():
+    cur = get_db().cursor()
+    cur.execute("DELETE FROM Basket;")
+    get_db().commit()
+    cur.close()
+    return jsonify({"Result": "TRUE"})
+
+@app.route("/basketUpdate", methods=['POST'])
+def basketUpdate():
+    menuID = request.form['menuID']
+
+    cur = get_db().cursor()
+    cur.execute("INSERT INTO Basket(menuID) VALUES (?);", (menuID, ));
+    get_db().commit()
+
+    cur.close()
+
+    print(menuID)
+
+    return jsonify({"Result": "TRUE"})
+
+@app.route("/getBasket")
+def getBasket():
+    cur = get_db().cursor()
+    cur.execute("SELECT menuID FROM Basket;")
+    info = cur.fetchall()
+    cur.close()
+    print(info)
+
+    return jsonify(info)
 
 @app.route("/countWaiting")
 def countWaiting():

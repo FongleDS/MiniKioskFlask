@@ -389,6 +389,7 @@ exports.default = jsQR;
 Object.defineProperty(exports, "__esModule", { value: true });
 var BitMatrix_1 = __webpack_require__(0);
 var REGION_SIZE = 8;
+
 var MIN_DYNAMIC_RANGE = 24;
 function numBetween(value, min, max) {
     return value < min ? min : value > max ? max : value;
