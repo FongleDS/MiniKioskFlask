@@ -21,7 +21,7 @@ body {
 
 .payment_btn {
     position: absolute;
-    bottom: calc(20% - 50px);
+    bottom: calc(10% - 50px);
     background-color: #B70050;
     color: white;
     border-radius: 5%;
@@ -29,8 +29,8 @@ body {
     padding: 30px 120px;*/
     border: none;
     /*margin-left: 110px;*/
-    font-size: 3rem; /* 상대적인 크기 지정 */
-    padding: 1rem 2rem;
+    font-size: 6rem; /* 상대적인 크기 지정 */
+    padding: 3rem 5rem;
     left: 50%; /* 가로 중앙 정렬을 위해 왼쪽 위치를 50%로 설정 */
     transform: translateX(-50%); /* 가로 방향으로 -50% 이동하여 가로 중앙 정렬 */
 }

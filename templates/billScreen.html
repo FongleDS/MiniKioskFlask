@@ -7,22 +7,22 @@
         <link href = "../static/billScreen.css" rel="stylesheet" type="text/css">
     </head>
     <body>
-        <button type="button" class="payment" onclick="location.href='./paymentScreen'">SELECT</button>
+        <button type="button" class="next_btn" onclick="location.href='./paymentScreen'">다음 ></button>
         <div class="orderID">
             <b><center>{{ orderID }}</center></b>
         </div>
         <div class="box1">
-            <div class="menu1" style="float: left; width: 130px;">
+            <div class="menu1" style="float: left; width: 450px;">
                 {{ menu }}
             </div>
-            <div class="quantity1" style="float: left; width: 100px;">
+            <div class="quantity1" style="float: left; width: 450px;">
                 <center>{{ quantitiy }}</center>
             </div>
-            <div class="price1" style="float: left; width: 100px; text-align: right;">
+            <div class="price1" style="float: left; width: 280px; text-align: right;">
                 {{ price }}
             </div>
         </div>
-        <div class="totalprice">
+        <div class="totalprice" style="text-align: right; width: 300px">
             <b>{{ total }}</b>
         </div>
     </body>

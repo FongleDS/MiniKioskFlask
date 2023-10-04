@@ -8,9 +8,9 @@
 </head>
 <body>
     <!-- 카드 결제 버튼 -->
-    <button type="button" class="payment" id="cardBtn">카드 결제</button>
+    <button type="button" class="card_btn" id="cardBtn"></button>
     <!-- 카카오페이 결제 버튼 -->
-    <button type="button" class="payment" id="kakaoBtn">카카오페이 결제</button>
+    <button type="button" class="kakao_btn" id="kakaoBtn"></button>
     <!-- 팝업 모달 -->
     <div id="myModal" class="modal">
         <div class="modal-content">
@@ -21,8 +21,13 @@
         </div>
     </div>
 
+    <div class="totalprice" style="text-align: right; width: 300px">
+
+            <b>{{ total }}</b>
+        </div>
+
     <!-- "다음으로" 버튼 -->
-    <button type="button" class="payment" id="nextBtn" style="display: none;" onclick="location.href='./completeScreen'">다음으로</button>
+    <button type="button" class="next_btn" id="nextBtn" style="display: none;" onclick="location.href='./completeScreen'">다음 ></button>
 
     <script>
         var paymentButtonClicked = false; // 결제 버튼이 클릭되었는지 여부를 저장하는 변수

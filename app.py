@@ -313,9 +313,11 @@ def bill():
 
     return render_template('billScreen.html', orderID=orderID, menu=menu, price=price, quantitiy = quantity, total = total)
 
-@app.route("/paymentScreen")
+@app.route("/paymentScreen", methods=['GET', 'POST'])
 def payment():
-    return render_template('paymentScreen.html')
+    price = billdata[2]
+    total = price
+    return render_template('paymentScreen.html', total = total)
 
 
 @app.route("/completeScreen")

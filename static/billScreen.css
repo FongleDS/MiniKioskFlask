@@ -15,17 +15,36 @@ body {
 }
 
 .orderID {
-    margin-top: 135px;
-    font-size: 30px;
-}
-
-.box1 {
-    font-size: 13px;
-    margin-top: 115px;
+    margin-top: 550px;
+    font-size: 110px;
     margin-left: 125px;
 }
 
+.box1 {
+    font-size: 60px;
+    margin-top: 430px;
+    margin-left: 460px;
+}
+
 .totalprice {
-    margin-top: 155px;
-    margin-left: 420px;
+    margin-top: 610px;
+    margin-left: 1340px;
+    font-size: 60px;
+}
+
+
+.next_btn {
+    position: absolute;
+    bottom: calc(20% - 50px);
+    background-color: #B70050;
+    color: white;
+    border-radius: 5%;
+    /*font-size: 30px;
+    padding: 30px 120px;*/
+    border: none;
+    /*margin-left: 110px;*/
+    font-size: 6rem; /* 상대적인 크기 지정 */
+    padding: 1.5rem 3rem;
+    left: 50%; /* 가로 중앙 정렬을 위해 왼쪽 위치를 50%로 설정 */
+    transform: translateX(-50%); /* 가로 방향으로 -50% 이동하여 가로 중앙 정렬 */
 }

@@ -10,11 +10,11 @@
             /* 중앙 정렬 스타일 추가 */
             #frame {
                 position: absolute;
-                top: 50%;
-                left: 50%;
+                top: 41%;
+                left: 33%;
                 transform: translate(-50%, -50%);
-                width: 250px; /* 원하는 가로 크기로 조정 */
-                height: 250px; /* 원하는 세로 크기로 조정 */
+                width: 60px; /* 원하는 가로 크기로 조정 */
+                height: 60px; /* 원하는 세로 크기로 조정 */
             }
         </style>
     </head>
@@ -83,8 +83,8 @@
         		      // 읽어들이는 비디오 화면의 크기
         		      // canvasElement.height = video.videoHeight;
         	 	      // canvasElement.width = video.videoWidth;
-                      canvasElement.height = 250;
-        	 	      canvasElement.width = 250;
+                      canvasElement.height = 800;
+        	 	      canvasElement.width = 800;
         		
         		      canvas.drawImage(video, 0, 0, canvasElement.width, canvasElement.height);
         		      var imageData = canvas.getImageData(0, 0, canvasElement.width, canvasElement.height);
