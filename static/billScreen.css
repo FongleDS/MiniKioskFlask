@@ -6,7 +6,7 @@ body, html {
 
 body {
     background-image: url('./billScreen.png');
-    background-size: cover;
+    background-size: contain;
     background-repeat: no-repeat;
     margin: 0;
     padding: 0;
@@ -15,20 +15,20 @@ body {
 }
 
 .orderID {
-    margin-top: 550px;
-    font-size: 110px;
-    margin-left: 125px;
+    margin-top: 500px;
+    font-size: 100px;
+    margin-right : 30px;
 }
 
 .box1 {
-    font-size: 60px;
-    margin-top: 430px;
-    margin-left: 460px;
+    font-size: 55px;
+    margin-top: 400px;
+    margin-left: 430px;
 }
 
 .totalprice {
-    margin-top: 610px;
-    margin-left: 1340px;
+    margin-top: 590px;
+    margin-left: 1280px;
     font-size: 60px;
 }
 
