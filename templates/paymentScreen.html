@@ -14,7 +14,7 @@
     <!-- 팝업 모달 -->
     <div id="myModal" class="modal">
         <div class="modal-content">
-            <!-- 모달 내용 -->
+            <!-- 닫기 버튼 -->
             <span class="close" onclick="closeModal()">&times;</span>
             <!-- 이미지를 모달에 추가하고 스타일을 지정 -->
             <img src="" id="popupImage">
@@ -22,28 +22,36 @@
     </div>
 
     <div class="totalprice" style="text-align: right; width: 300px">
-
-            <b>{{ total }}</b>
-        </div>
+        <b>{{ total }}</b>
+    </div>
 
     <!-- "다음으로" 버튼 -->
-    <button type="button" class="next_btn" id="nextBtn" style="display: none;" onclick="location.href='./completeScreen'">다음 ></button>
+    <button type="button" class="next_btn2" id="nextBtn" style="display: none;" onclick="location.href='./completeScreen'">다음 ></button>
 
     <script>
-        var paymentButtonClicked = false; // 결제 버튼이 클릭되었는지 여부를 저장하는 변수
-
         // 모달 열기
-        function openModal() {
+        function openModal(imagePath) {
             var modal = document.getElementById("myModal");
             modal.style.display = "block";
-            modal.classList.add("opened"); // opened 클래스 추가
+
+            // 이미지를 모달에 추가하고 스타일을 지정
+            var popupImage = document.getElementById("popupImage");
+            popupImage.src = imagePath;
+
+            // "다음 >" 버튼 표시
+            document.getElementById("nextBtn").style.display = "block";
+            // 닫기 버튼 표시
+            document.querySelector(".close").style.display = "block";
         }
 
         // 모달 닫기
         function closeModal() {
             var modal = document.getElementById("myModal");
             modal.style.display = "none";
-            modal.classList.remove("opened"); // opened 클래스 제거
+            // 닫기 버튼 숨김
+            document.querySelector(".close").style.display = "none";
+            // 다음 버튼 숨김
+            document.getElementById("nextBtn").style.display = "none";
         }
 
         // 카드 결제 버튼 클릭 시 모달 열고 이미지 표시
@@ -55,11 +63,7 @@
             var popupImage = document.getElementById("popupImage");
             popupImage.src = imagePath;
 
-            openModal();
-            if (!paymentButtonClicked) { // 결제 버튼이 처음 클릭되면
-                paymentButtonClicked = true; // 결제 버튼이 클릭되었음을 표시
-                document.getElementById("nextBtn").style.display = "block"; // "다음으로" 버튼 표시
-            }
+            openModal(imagePath);
         });
 
         // 카카오페이 결제 버튼 클릭 시 모달 열고 이미지 표시
@@ -71,11 +75,7 @@
             var popupImage = document.getElementById("popupImage");
             popupImage.src = imagePath;
 
-            openModal();
-            if (!paymentButtonClicked) { // 결제 버튼이 처음 클릭되면
-                paymentButtonClicked = true; // 결제 버튼이 클릭되었음을 표시
-                document.getElementById("nextBtn").style.display = "block"; // "다음으로" 버튼 표시
-            }
+            openModal(imagePath);
         });
     </script>
 </body>
