@@ -144,13 +144,23 @@ def basketUpdate():
 
 @app.route("/getBasket")
 def getBasket():
+    total_info = []
     cur = get_db().cursor()
     cur.execute("SELECT menuID FROM Basket;")
-    info = cur.fetchall()
-    cur.close()
-    print(info)
+    menus = cur.fetchall()
+    print(menus)
+    print(type(menus))
 
-    return jsonify(info)
+    for i in range(len(menus)):
+        cur.execute("SELECT Menu.MenuName, Menu.menuprice, Restaurant.RestName, Menu.menuID FROM Restaurant, Menu WHERE Menu.MenuID = ? and Menu.RestID = Restaurant.RestID;", (menus[i][0], ))
+        info = cur.fetchall()
+        print(info)
+        total_info.append(info)
+        print(total_info)
+
+    cur.close()
+
+    return jsonify(total_info)
 
 @app.route("/countWaiting")
 def countWaiting():
@@ -244,8 +254,19 @@ def getmenuName():
 def orderUpdate():
     std_id = request.form['stdID']
     menu_id = request.form['menuID']
+    print("menuID : ", menu_id)
     seat_id = request.form['seatID']
     order_date = request.form['orderDate']
+    restID = [];
+
+    menu_id = str(menu_id)
+    menu_id = menu_id.replace(" ", "")
+    menu_id = menu_id.replace("[", "")
+    menu_id = menu_id.replace("]", "")
+
+    menus = menu_id.split(",")
+    print("menus : ", menus)
+
 
     cur = get_db().cursor()
 
@@ -255,14 +276,15 @@ def orderUpdate():
 
         # 마지막에 삽입된 데이터의 ID를 가져옴
         last_inserted_id = cur.lastrowid
+        for i in range(len(menus)):
+            # orderdetail 테이블에 삽입
+            cur.execute("INSERT INTO OrderDetail (orderID, menuID) VALUES (?, ?)",
+                        (last_inserted_id, menus[i]))
+            get_db().commit()
 
-        # orderdetail 테이블에 삽입
-        cur.execute("INSERT INTO OrderDetail (orderID, menuID) VALUES (?, ?)",
-                    (last_inserted_id, menu_id))
-        get_db().commit()
-
-        cur.execute("SELECT RestID FROM Menu WHERE menuID=?;", (menu_id,))
-        info = cur.fetchone()
+            cur.execute("SELECT RestID FROM Menu WHERE menuID=?;", (menus[i],))
+            info = cur.fetchall()
+            restID.append(info[0])
 
     except Exception as e:
         print("Error:", e)
@@ -273,13 +295,14 @@ def orderUpdate():
 
     cur.close()
     print("last_inserted_id : ", last_inserted_id)
+    print("restID : ", restID)
 
     if last_inserted_id:
         result = {
             "orderID": last_inserted_id,
-            "MenuID": menu_id,
+            "MenuID": menus,
             "StdID": std_id,
-            "RestID": info[0]
+            "RestID": restID
         }
         print("========")
         #socketio.emit('order_updated', result, broadcast=True)
