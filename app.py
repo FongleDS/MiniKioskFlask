@@ -24,8 +24,6 @@ def close_connection(exception):
     if db is not None:
         db.close()
 
-
-
 # 식당별 대기 인원 카운트
 @app.route('/restCount')
 def restCount():
@@ -38,6 +36,7 @@ def restCount():
     return jsonify(data)
 
 
+# 좌석 정보 가져오기
 @app.route('/seatInfo')
 def seatInfo():
     sql_string = "SELECT seatID, seatUse FROM Seat;"
@@ -74,6 +73,7 @@ def get_password():
         return jsonify({"error": "Student ID not found"}), 404
 
 
+# 로그인하기 위한 비밀 번호 가져오기
 @app.route('/getRestPassword', methods=['POST'])
 def getRestPW():
     RestID = request.form['RestID']
@@ -91,7 +91,7 @@ def getRestPW():
     else:
         return jsonify({"error": "Student ID not found"}), 404
 
-
+# 주문 정보 가져오기
 @app.route("/getOrderInfo", methods=['POST'])
 def getOrderInfo():
     order_id = request.form['orderID']
@@ -109,7 +109,7 @@ def getOrderInfo():
     else:
         return jsonify({"error": "Student ID not found"}), 404
 
-
+# 잔여 좌석 가져오기
 @app.route("/countSeat")
 def countSeat():
     cur = get_db().cursor()
@@ -120,6 +120,7 @@ def countSeat():
 
     return jsonify({"leftseat": info[0]})
 
+# 장바구니 초기화
 @app.route("/basketInit")
 def basketInit():
     cur = get_db().cursor()
@@ -128,6 +129,7 @@ def basketInit():
     cur.close()
     return jsonify({"Result": "TRUE"})
 
+# 장바구니에 메뉴 추가
 @app.route("/basketUpdate", methods=['POST'])
 def basketUpdate():
     menuID = request.form['menuID']
@@ -142,6 +144,7 @@ def basketUpdate():
 
     return jsonify({"Result": "TRUE"})
 
+# 장바구니 정보 가져오기
 @app.route("/getBasket")
 def getBasket():
     total_info = []
@@ -162,6 +165,7 @@ def getBasket():
 
     return jsonify(total_info)
 
+# 식당 별 대기인원 카운트
 @app.route("/countWaiting")
 def countWaiting():
     cur = get_db().cursor()
@@ -301,6 +305,10 @@ def orderUpdate():
     print(type(restID))
     print(len(restID))
 
+    results = {
+        "orderID": last_inserted_id,
+    }
+
     if last_inserted_id:
         for i in range(len(restID)):
             print(restID[i][0])
@@ -317,24 +325,29 @@ def orderUpdate():
             print(result)
 
         print(response)
-        return jsonify(response)
+
+        # return jsonify(response)
+        return jsonify(results)
     else:
         return jsonify({"error": "Student ID not found"}), 404
 
+
+####################################### KIOSK 관련 CODE #######################################
+
+billdata = []
 
 # 시작 페이지 연결
 @app.route("/")
 def home():
     return render_template('startScreen.html')
 
-
 # QR코드 리더기 페이지 연결
 @app.route("/QRScreen")
 def qrscreen():
     return render_template('QRScreen.html')
 
-billdata = []
 
+#QR코드 읽고 정보 가져오기
 @app.route("/getQRInfo", methods=['POST', 'GET'])
 def QRInfo():
 
@@ -374,6 +387,8 @@ def bill():
 
     return render_template('billScreen.html', orderID=orderID, menu=menu, price=price, quantitiy = quantity, total = total)
 
+
+# 결제창 연결
 @app.route("/paymentScreen", methods=['GET', 'POST'])
 def payment():
     price = billdata[2]
@@ -381,6 +396,7 @@ def payment():
     return render_template('paymentScreen.html', total = total)
 
 
+# 결제 완료창 연결
 @app.route("/completeScreen")
 def complete():
     return render_template('completeScreen.html')
