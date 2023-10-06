@@ -257,7 +257,9 @@ def orderUpdate():
     print("menuID : ", menu_id)
     seat_id = request.form['seatID']
     order_date = request.form['orderDate']
+
     restID = [];
+    response = [];
 
     menu_id = str(menu_id)
     menu_id = menu_id.replace(" ", "")
@@ -296,20 +298,26 @@ def orderUpdate():
     cur.close()
     print("last_inserted_id : ", last_inserted_id)
     print("restID : ", restID)
+    print(type(restID))
+    print(len(restID))
 
     if last_inserted_id:
-        result = {
-            "orderID": last_inserted_id,
-            "MenuID": menus,
-            "StdID": std_id,
-            "RestID": restID
-        }
-        print("========")
-        #socketio.emit('order_updated', result, broadcast=True)
-        socketio.emit('order_updated', result)
-        print(result)
+        for i in range(len(restID)):
+            print(restID[i][0])
+            result = {
+                "orderID": last_inserted_id,
+                "MenuID": menus[i],
+                "StdID": std_id,
+                "RestID": restID[i][0]
+            }
+            print("========")
+            #socketio.emit('order_updated', result, broadcast=True)
+            socketio.emit('order_updated', result)
+            response.append(result)
+            print(result)
 
-        return jsonify(result)
+        print(response)
+        return jsonify(response)
     else:
         return jsonify({"error": "Student ID not found"}), 404
 
