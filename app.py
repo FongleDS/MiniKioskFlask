@@ -27,7 +27,7 @@ def close_connection(exception):
 # 식당별 대기 인원 카운트
 @app.route('/restCount')
 def restCount():
-    sql_string = "SELECT R.RestID, COUNT(O.menuID) AS order_count FROM Restaurant R LEFT JOIN Menu M ON R.RestID = M.RestID LEFT JOIN OrderDetail O ON O.menuID = M.menuID AND O.orderstats = 0 GROUP BY R.RestID;"
+    sql_string = "SELECT R.RestID, COUNT(O.menuID) AS order_count FROM Restaurant R LEFT JOIN Menu M ON R.RestID = M.RestID LEFT JOIN OrderDetail O ON O.menuID = M.menuID AND O.orderstats = '0' GROUP BY R.RestID;"
     cur = get_db().cursor()
     cur.execute(sql_string)
 
@@ -205,25 +205,6 @@ def seatOFF():
     return jsonify({"Result": "FALSE"})
 
 
-
-@app.route("/updateOrderStat", methods=['POST'])
-def updateOrderStat():
-    stat = request.form['stat']
-    print(stat)
-    orderID = request.form['orderID']
-
-    if stat == "1":
-        print("Send!")
-        socketio.emit('pickup_alarm', "ALARM")
-
-    cur = get_db().cursor()
-    cur.execute("UPDATE OrderDetail SET orderstats = ? WHERE orderID = ?;", (stat, orderID))
-    get_db().commit()
-    cur.close()
-
-    return jsonify({"Result": "ALARM"})
-
-
 @app.route("/getSeatInfo", methods=['POST'])
 def getSeatInfo():
     seatID = request.form['seatID']
@@ -253,6 +234,33 @@ def getmenuName():
     print("=========")
 
     return jsonify({"Menu": info[0]})
+
+@app.route("/updateOrderStat", methods=['POST'])
+def updateOrderStat():
+    stat = request.form['stat']
+    print(stat)
+    orderID = request.form['orderID']
+    print(orderID)
+    realorderID = orderID.split(" ")
+    print(realorderID[1])
+    cur = get_db().cursor()
+
+    if stat == "1":
+        print("Send!")
+        socketio.emit('pickup_alarm', "ALARM")
+        cur.execute("SELECT COUNT(*) FROM OrderDetail, Orders WHERE OrderDetail.orderID=? and Orders.orderID=OrderDetail.orderID and OrderDetail.orderstats = '0';", (realorderID[1],))
+        count = cur.fetchone()
+        counts = str(count[0])
+        print(counts)
+        if counts == "0":
+            print("LAST")
+            socketio.emit('lastOrderAlarm', "LASTALARM")
+
+    cur.execute("UPDATE OrderDetail SET orderstats = ? WHERE orderID = ?;", (stat, realorderID[1]))
+    get_db().commit()
+    cur.close()
+
+    return jsonify({"Result": "ALARM"})
 
 @app.route('/orderUpdate', methods=['POST'])
 def orderUpdate():
@@ -284,8 +292,8 @@ def orderUpdate():
         last_inserted_id = cur.lastrowid
         for i in range(len(menus)):
             # orderdetail 테이블에 삽입
-            cur.execute("INSERT INTO OrderDetail (orderID, menuID) VALUES (?, ?)",
-                        (last_inserted_id, menus[i]))
+            cur.execute("INSERT INTO OrderDetail (orderID, menuID, orderStats) VALUES (?, ?, ?)",
+                        (last_inserted_id, menus[i], '0'))
             get_db().commit()
 
             cur.execute("SELECT RestID FROM Menu WHERE menuID=?;", (menus[i],))
@@ -296,10 +304,6 @@ def orderUpdate():
         print("Error:", e)
         get_db().rollback()
 
-    finally:
-        cur.close()
-
-    cur.close()
     print("last_inserted_id : ", last_inserted_id)
     print("restID : ", restID)
     print(type(restID))
@@ -325,6 +329,7 @@ def orderUpdate():
             print(result)
 
         print(response)
+        cur.close()
 
         # return jsonify(response)
         return jsonify(results)
