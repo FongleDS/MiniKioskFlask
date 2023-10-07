@@ -99,13 +99,13 @@ def getOrderInfo():
     print(order_id)
 
     cur = get_db().cursor()
-    cur.execute("SELECT Student.stdName, Orders.orderDate, Orders.seatID, Menu.menuName FROM Orders JOIN Student ON Orders.stdID = Student.stdID JOIN OrderDetail ON Orders.orderID = OrderDetail.orderID JOIN Menu ON OrderDetail.menuID = Menu.menuID WHERE Orders.orderID = ?;", (order_id, ))
+    cur.execute("SELECT Student.stdName, Orders.orderDate, Orders.seatID FROM Orders JOIN Student ON Orders.stdID = Student.stdID JOIN OrderDetail ON Orders.orderID = OrderDetail.orderID JOIN Menu ON OrderDetail.menuID = Menu.menuID WHERE Orders.orderID = ?;", (order_id, ))
     info = cur.fetchone()
     cur.close()
     print(info)
 
     if info:
-        return jsonify({"stdName": info[0]}, {"orderdate": info[1]}, {"seatid": info[2]}, {"menuName" : info[3]})
+        return jsonify({"stdName": info[0]}, {"orderdate": info[1]}, {"seatid": info[2]}, {"menuName" : "None"})
     else:
         return jsonify({"error": "Student ID not found"}), 404
 
@@ -262,6 +262,7 @@ def updateOrderStat():
 
     return jsonify({"Result": "ALARM"})
 
+
 @app.route('/orderUpdate', methods=['POST'])
 def orderUpdate():
     std_id = request.form['stdID']
@@ -290,6 +291,10 @@ def orderUpdate():
 
         # 마지막에 삽입된 데이터의 ID를 가져옴
         last_inserted_id = cur.lastrowid
+
+        cur.execute("UPDATE Seat SET seatUse = 'YES' WHERE seatID = ?;", (seat_id, ))
+        get_db().commit()
+
         for i in range(len(menus)):
             # orderdetail 테이블에 삽입
             cur.execute("INSERT INTO OrderDetail (orderID, menuID, orderStats) VALUES (?, ?, ?)",
@@ -404,6 +409,25 @@ def payment():
 # 결제 완료창 연결
 @app.route("/completeScreen")
 def complete():
+    stat = 2
+    print(stat)
+    orderID = request.form['orderID']
+    print(orderID)
+    # realorderID = orderID.split(" ")
+    # print(realorderID[1])
+    cur = get_db().cursor()
+
+    cur.execute("UPDATE OrderDetail SET orderstats = ? WHERE orderID = ?;", (stat, orderID))
+    get_db().commit()
+
+    cur.execute("SELECT SeatID FROM Orders WHERE orderID = ?;", (orderID,))
+    seatID = cur.fetchall()
+
+    cur.execute("UPDATE Seat SET seatUse = 'NO'  WHERE seatID = ?;", (seatID, ))
+    get_db().commit()
+
+    cur.close()
+
     return render_template('completeScreen.html')
 
 if __name__ == '__main__':
