@@ -8,22 +8,30 @@
     </head>
     <body>
         <button type="button" class="next_btn" onclick="location.href='./paymentScreen'">다음 ></button>
-        <div class="orderID">
-            <b><center>{{ orderID }}</center></b>
+        <div class="orderID" >
+            <b><center>{{ billdata[0].orderID }}</center></b>
         </div>
-        <div class="box1">
-            <div class="menu1" style="float: left; width: 420px;">
-                {{ menu }}
+        <div class="bill-container">
+            {% for item in billdata %}
+            <div class="bill-item">
+                <div class="menu1">
+                    {{ item.menu }}
+                </div>
+                <div class="quantity1">
+                    <center>{{ item.quantity }}</center>
+                </div>
+                <div class="price1">
+                    {{ item.price }}
+                </div>
             </div>
-            <div class="quantity1" style="float: left; width: 390px;">
-                <center>{{ quantitiy }}</center>
+            {% endfor %}
+            <div class="h-split"></div>
+            <div class="totalprice">
+                <div class="totalprice_title" style="float: left";><b>주문합계</b></div>
+                <div class="totalprice_price" style="float: right;"><b>{{ total }}</b></div>
+                <div style="clear: both;"></div>
             </div>
-            <div class="price1" style="float: left; width: 300px; text-align: right;">
-                {{ price }}
-            </div>
-        </div>
-        <div class="totalprice" style="text-align: right; width: 250px">
-            <b>{{ total }}</b>
         </div>
     </body>
 </html>
+

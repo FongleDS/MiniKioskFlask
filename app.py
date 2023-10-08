@@ -99,13 +99,13 @@ def getOrderInfo():
     print(order_id)
 
     cur = get_db().cursor()
-    cur.execute("SELECT Student.stdName, Orders.orderDate, Orders.seatID FROM Orders JOIN Student ON Orders.stdID = Student.stdID JOIN OrderDetail ON Orders.orderID = OrderDetail.orderID JOIN Menu ON OrderDetail.menuID = Menu.menuID WHERE Orders.orderID = ?;", (order_id, ))
+    cur.execute("SELECT Student.stdName, Orders.orderDate, Orders.seatID, Orders.orderID FROM Orders JOIN Student ON Orders.stdID = Student.stdID JOIN OrderDetail ON Orders.orderID = OrderDetail.orderID JOIN Menu ON OrderDetail.menuID = Menu.menuID WHERE Orders.orderID = ?;", (order_id, ))
     info = cur.fetchone()
     cur.close()
     print(info)
 
     if info:
-        return jsonify({"stdName": info[0]}, {"orderdate": info[1]}, {"seatid": info[2]}, {"menuName" : "None"})
+        return jsonify({"stdName": info[0]}, {"orderdate": info[1]}, {"seatid": info[2]},{"orderID": info[3]}, {"menuName" : "None"})
     else:
         return jsonify({"error": "Student ID not found"}), 404
 
@@ -367,7 +367,7 @@ def QRInfo():
 
     stdID = str(info[1])
     orderID = str(info[0])
-    sql = "SELECT Orders.orderID, Menu.menuName, Menu.menuPrice FROM Orders JOIN OrderDetail ON Orders.orderID = OrderDetail.orderID JOIN Menu ON OrderDetail.menuID = Menu.menuID JOIN Student ON Student.stdID = Orders.stdID WHERE Student.stdID = ? AND Orders.orderID = ?;"
+    sql = "SELECT Orders.orderID, Menu.menuName, Menu.menuPrice, Orders.quantity FROM Orders JOIN OrderDetail ON Orders.orderID = OrderDetail.orderID JOIN Menu ON OrderDetail.menuID = Menu.menuID JOIN Student ON Student.stdID = Orders.stdID WHERE Student.stdID = ? AND Orders.orderID = ?;"
 
     cur = get_db().cursor()
     cur.execute(sql, (stdID, orderID))
@@ -375,34 +375,35 @@ def QRInfo():
     print(data_list)
     cur.close()
 
+    # 기존 billdata 초기화
+    billdata.clear()
+
     for item in data_list:
-        for data in item:
-            billdata.append(data)
+        billdata.append({
+            "orderID": item[0],
+            "menu": item[1],
+            "price": item[2],
+            "quantity" : item[3]
+        })
 
     print(billdata)
 
-    print(data_list)
     return jsonify(data_list)
 
 
 # bill 페이지 연결과 동시에 주문 내역 반환
 @app.route('/billScreen', methods=['GET','POST'])
 def bill():
-
-    quantity = "1"
-    orderID = billdata[0]
-    menu = billdata[1]
-    price = billdata[2]
-    total = price
-
-    return render_template('billScreen.html', orderID=orderID, menu=menu, price=price, quantitiy = quantity, total = total)
+    total = sum(menu["price"] for menu in billdata)
+    print(billdata)
+    print(total)
+    return render_template('billScreen.html', billdata=billdata, total = total)
 
 
 # 결제창 연결
 @app.route("/paymentScreen", methods=['GET', 'POST'])
 def payment():
-    price = billdata[2]
-    total = price
+    total = sum(menu["price"] for menu in billdata)
     return render_template('paymentScreen.html', total = total)
 
 
@@ -411,7 +412,7 @@ def payment():
 def complete():
     stat = 2
     print(stat)
-    orderID = request.form['orderID']
+    orderID = billdata[0]["orderID"]
     print(orderID)
     # realorderID = orderID.split(" ")
     # print(realorderID[1])
@@ -420,12 +421,17 @@ def complete():
     cur.execute("UPDATE OrderDetail SET orderstats = ? WHERE orderID = ?;", (stat, orderID))
     get_db().commit()
 
-    cur.execute("SELECT SeatID FROM Orders WHERE orderID = ?;", (orderID,))
-    seatID = cur.fetchall()
+    cur.execute("SELECT seatID FROM Orders WHERE orderID = ?;", (orderID,))
+    seatIDs = cur.fetchall()
+    print(seatIDs)
 
-    cur.execute("UPDATE Seat SET seatUse = 'NO'  WHERE seatID = ?;", (seatID, ))
+
+    # seatIDs 리스트의 각 seatID에 대해 업데이트 수행
+    for seatID in seatIDs:
+        cur.execute("UPDATE Seat SET seatUse = 'NO' WHERE seatID = ?;", (seatID[0],))
+
+    # 커밋
     get_db().commit()
-
     cur.close()
 
     return render_template('completeScreen.html')
