@@ -329,15 +329,16 @@ def orderUpdate():
             }
             print("========")
             #socketio.emit('order_updated', result, broadcast=True)
-            socketio.emit('order_updated', result)
             response.append(result)
             print(result)
 
+        socketio.emit('order_updated', response)
         print(response)
         cur.close()
 
         # return jsonify(response)
-        return jsonify(results)
+        return jsonify(response)
+        #return jsonify(order_updates)
     else:
         return jsonify({"error": "Student ID not found"}), 404
 
